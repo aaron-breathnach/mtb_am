@@ -1,0 +1,6 @@
+extract protocol	AM were infected with live virulent Mtb H37Rv for 24 hours (hr) using a multiplicity of infection of 1-10 bacilli per cell, as previously described. AM were then lysed, and total RNA was collected and purified using silica-membrane column centrifugation.
+label protocol	NanoString
+hyb protocol	NanoString nCounter Metabolic Pathways Panel 
+scan protocol	NanoString nCounter Metabolic Pathways Panel 
+data processing	Data were analysed using the NanoString nSolver Data Analysis Software
+value definition	Counts per gene

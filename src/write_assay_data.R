@@ -1,3 +1,18 @@
+get_sample_id <- function(rcc) {
+  
+  tmp <- rcc %>%
+    str_split("_") %>%
+    unlist() %>%
+    nth(3) 
+  
+  str_c(
+    str_sub(tmp, 1, 5),
+    "_",
+    ifelse(grepl("Un", tmp), "uninfected", "infected")
+  )
+  
+}
+
 import_assay_data <- function(inp_dir) {
   
   inpdir <- gsub("/$", "", inp_dir)
@@ -16,9 +31,11 @@ import_assay_data <- function(inp_dir) {
   
   rownames(assay_data) <- genes
   
-  colnames(assay_data) <- colnames(assay_data) %>%
-    str_replace(".*_", "") %>%
-    str_replace(".RCC", "")
+  sample_ids <- colnames(assay_data) %>%
+    purrr::map(function(x) get_sample_id(x)) %>%
+    unlist()
+  
+  colnames(assay_data) <- sample_ids
   
   assay_data <- assay_data %>%
     as.data.frame() %>%
