@@ -1,5 +1,5 @@
 library(tidyverse)
 R.utils::sourceDirectory("src")
 write_assay_data()
-make_figure_1(format = "wide", pal = c("#0096ff", "#bbbbbb"))
-make_figure_1(format = "long", pal = c("#0096ff", "#bbbbbb"))
+make_figure_1(format = "wide")
+make_figure_1(format = "long")

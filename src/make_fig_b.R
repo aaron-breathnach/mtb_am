@@ -13,8 +13,6 @@ pca_plot <- function(pca_inp, meta, col_by, pal, conf = FALSE) {
     mutate(sample_id = as.character(sample_id)) %>%
     inner_join(meta, by = "sample_id")
   
-  legend_title <- str_to_title(col_by)
-  
   pca_plot <- ggplot(pca_points, aes(x = PC1, y = PC2)) +
     geom_point(aes(fill = !!ensym(col_by)), pch = 21, colour = "black", size = 3) +
     geom_point(pch = 21, size = 3) +
@@ -24,7 +22,7 @@ pca_plot <- function(pca_inp, meta, col_by, pal, conf = FALSE) {
           legend.position = "top") +
     scale_colour_manual(values = pal) +
     scale_fill_manual(values = pal) +
-    labs(x = pc1_label, y = pc2_label, colour = legend_title, fill = legend_title) +
+    labs(x = pc1_label, y = pc2_label, colour = "Condition", fill = "Condition") +
     stat_ellipse(aes(colour = !!ensym(col_by)), linetype = "dashed")
   
   return(pca_plot)
@@ -36,7 +34,9 @@ pca_wrapper <- function(inp_dir, pal, conf = FALSE) {
   inp_dir <- paste0(gsub("/$", "", inp_dir), "/")
   
   meta <- read_tsv(paste0(inp_dir, "metadata.tsv")) %>%
-    mutate(sample_id = str_pad(sample_id, 2, "left", "0"))
+    mutate(sample_id = str_pad(sample_id, 2, "left", "0")) %>%
+    mutate(group = recode(group, "Uninf" = "Uninfected", "Rv-Infected" = "Infected")) %>%
+    mutate(group = factor(group, levels = c("Uninfected", "Infected")))
   
   pca_inp <- read_tsv(paste0(inp_dir, "assay_data.tsv")) %>%
     pivot_longer(!gene, names_to = "sample_id", values_to = "count") %>%

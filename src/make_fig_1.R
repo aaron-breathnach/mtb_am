@@ -1,12 +1,12 @@
-make_figure_1 <- function(format, pal) {
+make_figure_1 <- function(format) {
   
   fig_a <- make_fig_a()
-  fig_b <- make_fig_b(pal)
-  fig_c <- make_fig_c(pal)
-  fig_d <- make_fig_d(pal)
-  fig_e <- make_fig_e(pal)
+  fig_b <- make_fig_b(pal = c("Infected" = "#E7B5AC", "Uninfected" = "#869F77"))
+  fig_c <- make_fig_c(pal = c("red", "blue"))
+  fig_d <- make_fig_d(pal = c("#E7B5AC", "#869F77"))
+  fig_e <- make_fig_e(pal = c("red", "blue"))
   fig_f <- make_fig_f()
-  fig_g <- make_fig_g(pal)
+  fig_g <- make_fig_g(pal = c("#E7B5AC", "#869F77"))
   
   dir.create("figure_1", showWarnings = FALSE)
   ggsave("figure_1/fig_b.png", fig_b, width = 6.25, height = 5.00)

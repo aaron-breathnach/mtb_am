@@ -82,9 +82,6 @@ volcano_plot <- function(de, q = 0.05, pal) {
 
 make_fig_c <- function(pal) {
   
-  pal <- purrr::map(pal, function(x) colorspace::darken(x, 1/3)) %>%
-    unlist()
-  
   pal <- c(pal, "lightgrey")
   
   de <- import_DE("data/de.all_res.tsv")

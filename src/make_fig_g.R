@@ -70,13 +70,65 @@ make_boxplot <- function(ldh, GROUP, method, method.args = list(), pal) {
           axis.text.x = axis_text_x,
           strip.text = element_text(face = strip_text),
           axis.title = element_text(face = "bold")) +
-    labs(x = "Gene", y = "log(count)") +
+    labs(x = "Condition", y = "log(count)") +
     scale_colour_manual(values = pal) +
     scale_fill_manual(values = pal) +
     ggpubr::stat_pwc(method = method,
                      method.args = method.args,
                      p.adjust.method = "BH") +
     scale_y_continuous(expand = expansion(mult = c(0.1, 0.105)))
+  
+}
+
+make_bar_chart <- function(ldh, GROUP, method, method.args = list()) {
+  
+  df_1 <- ldh %>%
+    mutate(expr = log1p(expr)) %>%
+    mutate(disease = factor(disease, levels = c("Uninfected", "Infected")))
+  
+  df_2 <- df_1 %>%
+    group_by(disease, gene) %>%
+    summarise(mean = mean(expr), se = sd(expr) / sqrt(n()))
+  
+  ann <- df_1 %>%
+    group_by(disease) %>%
+    rstatix::wilcox_test(expr ~ gene, paired = TRUE) %>%
+    mutate(gene = group1)
+  
+  y <- max(df_1$expr) + (0.1 * ((1.1 * max(df_1$expr)) - (min(df_1$expr) / 1.1)))
+  
+  ggplot(df_2, aes(x = gene, y = mean)) +
+    facet_wrap(~ disease) +
+    geom_bar(
+      stat = "identity",
+      colour = "black",
+      fill = "#967bb6"
+    ) +
+    geom_jitter(
+      data = df_1,
+      aes(x = gene, y = expr),
+      colour = "grey",
+      alpha = 0.500,
+      width = 0.125
+    ) +
+    geom_errorbar(
+      aes(ymin = mean - se, ymax = mean + se),
+      width = 0.25
+    ) +
+    theme_bw(base_size = 12.5) +
+    theme(
+      panel.grid = element_blank(),
+      axis.title = element_text(face = "bold"),
+      axis.text.x = element_text(face = "italic"),
+      strip.text = element_text(face = "bold")
+    ) +
+    coord_cartesian(ylim = c(min(df_1$expr), 1.05 * max(df_1$expr))) +
+    labs(x = "Gene", y = "log(count)") +
+    ggpubr::stat_pvalue_manual(
+      ann,
+      label = "p = {round(p, 3)}",
+      y.position = y
+    )
   
 }
 
@@ -93,11 +145,28 @@ plot_dat <- function(method, method.args = list(), pal) {
   
   p1 <- make_boxplot(ldh, "disease", method, method.args, pal = pal)
   
-  p2 <- make_boxplot(ldh,
-                     "gene",
-                     method,
-                     method.args,
-                     pal = wesanderson::wes_palette("Chevalier1", 2))
+  p2 <- make_bar_chart(ldh, "disease", method, method.args)
+  
+  p <- p1 + p2
+  
+  return(p)
+  
+}
+
+plot_dat <- function(method, method.args = list(), pal) {
+  
+  dat <- import_data()
+  
+  ldh <- dat %>%
+    filter(gene %in% c("LDHA", "LDHB")) %>%
+    select(disease, gene, expr) %>%
+    distinct()
+  
+  ldh$disease <- factor(ldh$disease, levels = c("Uninfected", "Infected"))
+  
+  p1 <- make_boxplot(ldh, "disease", method, method.args, pal = pal)
+  
+  p2 <- make_bar_chart(ldh, "disease", method, method.args)
   
   p <- patchwork::wrap_plots(p1, p2)
   

@@ -34,16 +34,14 @@ make_fig_e <- function(pal) {
     purrr::map(\(x) get_gene_set(x, gois)) %>%
     setNames(pathways)
   
+  groups <- c(paste("\U2191", "in infected AM"), paste("\U2193", "in infected AM"))
+  names(pal) <- groups
+  
   res <- run_gsea("data/de.all_res.tsv", gene_set) %>%
-    mutate(group = ifelse(NES >= 0,
-                          paste("Infected"),
-                          paste("Uninfected"))) %>%
+    suppressWarnings() %>%
+    mutate(group = ifelse(NES >= 0, groups[1], groups[2])) %>%
     mutate(label = ifelse(padj <= 0.05, "*", "")) %>%
     mutate(hjust = ifelse(NES > 0, -0.25, 1.25))
-  
-  pal_names <- c("Infected", "Uninfected")
-  
-  names(pal) <- pal_names
   
   p <- ggplot(res, aes(x = NES, y = reorder(pathway, NES))) +
     geom_bar(aes(fill = group),
